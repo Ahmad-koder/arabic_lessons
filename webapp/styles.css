@@ -1,0 +1,275 @@
+:root {
+  --bg: var(--tg-theme-bg-color, #ffffff);
+  --bg2: var(--tg-theme-secondary-bg-color, #f2f2f6);
+  --text: var(--tg-theme-text-color, #111111);
+  --hint: var(--tg-theme-hint-color, #8a8a8e);
+  --link: var(--tg-theme-link-color, #2a7ae2);
+  --accent: var(--tg-theme-button-color, #2a7ae2);
+  --accent-text: var(--tg-theme-button-text-color, #ffffff);
+  --section: var(--tg-theme-section-bg-color, var(--bg));
+  --sep: var(--tg-theme-section-separator-color, rgba(128, 128, 128, 0.22));
+  --ok: #2e9d57;
+  --bad: #d64545;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg2);
+  color: var(--text);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 12px calc(24px + env(safe-area-inset-bottom));
+}
+
+h1 {
+  font-size: 22px;
+  line-height: 1.25;
+  margin: 8px 4px 4px;
+}
+
+h2 {
+  font-size: 17px;
+  margin: 20px 4px 8px;
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+b {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--hint);
+}
+
+.center {
+  text-align: center;
+}
+
+.ar {
+  font-family: "Noto Naskh Arabic", "Geeza Pro", "Arabic Typesetting", serif;
+  font-size: 1.3em;
+  line-height: 1.6;
+  unicode-bidi: isolate;
+}
+
+.card {
+  background: var(--section);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+/* Список уроков */
+.lesson-link {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lesson-num {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  background: var(--bg2);
+}
+
+.lesson-link.done .lesson-num {
+  background: var(--ok);
+  color: #fff;
+}
+
+.lesson-title {
+  font-weight: 600;
+}
+
+.lesson-sub {
+  font-size: 14px;
+  color: var(--hint);
+}
+
+.progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg2);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* Урок */
+.back {
+  background: none;
+  border: 0;
+  color: var(--link);
+  font: inherit;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 -16px 10px;
+  padding: 0 16px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--sep);
+  padding: 8px 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--hint);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+td .ar {
+  font-size: 1.35em;
+}
+
+.nw {
+  white-space: nowrap;
+}
+
+ul.items {
+  margin: 0;
+  padding-left: 20px;
+}
+
+ul.items li {
+  margin-bottom: 8px;
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  font-size: 14px;
+}
+
+/* Упражнения */
+.ex-prompt {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ex-item {
+  border-top: 1px solid var(--sep);
+  padding: 10px 0;
+}
+
+.ex-q {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.ex-q .ar {
+  font-size: 1.7em;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.opt,
+.btn {
+  border: 1px solid var(--sep);
+  background: var(--bg2);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: transparent;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.opt.correct {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+
+.opt.wrong {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+}
+
+.opt:disabled {
+  cursor: default;
+}
+
+.feedback {
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.feedback.ok {
+  color: var(--ok);
+}
+
+.feedback.bad {
+  color: var(--bad);
+}
+
+.answer {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg2);
+}
+
+.score {
+  font-size: 14px;
+  color: var(--hint);
+  margin-top: 4px;
+}
