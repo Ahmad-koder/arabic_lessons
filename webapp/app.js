@@ -173,7 +173,6 @@
     setBackButton(false);
     app.innerHTML = "";
     app.appendChild(el("h1", null, escapeHtml(course.course)));
-    app.appendChild(el("p", "muted", escapeHtml(course.author)));
 
     course.lessons.forEach(function (lesson) {
       const done = progress.done[lesson.id] === true;
