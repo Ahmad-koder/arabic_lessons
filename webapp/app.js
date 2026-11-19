@@ -317,7 +317,6 @@
     }
 
     app.appendChild(el("h1", null, "Урок " + lesson.id + ". " + escapeHtml(lesson.title)));
-    app.appendChild(el("p", "muted", "По видео №" + lesson.video));
 
     const theory = el("div", "card");
     lesson.blocks.forEach(function (block) {

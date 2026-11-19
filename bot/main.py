@@ -82,7 +82,7 @@ async def start(message: Message, command: CommandObject, bot: Bot) -> None:
             lesson_id = int(tail)
 
     await message.answer(
-        "Ас-саляму алейкум! Здесь уроки арабского по видео канала: теория, таблицы и упражнения.\n\n"
+        "Ас-саляму алейкум! Здесь уроки арабского: теория, таблицы и упражнения.\n\n"
         "Нажмите кнопку ниже, чтобы открыть уроки. Список — /lessons.",
         reply_markup=open_button("Открыть уроки" if lesson_id is None else f"Открыть урок {lesson_id}", lesson_id),
     )
