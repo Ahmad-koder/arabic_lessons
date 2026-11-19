@@ -6,7 +6,7 @@
 ## Запуск
 
 1. **Бот.** В @BotFather: `/newbot` → получите токен.
-2. **Mini App на GitHub Pages.** Запушьте репозиторий на GitHub, затем Settings → Pages → Source: **GitHub Actions**. Workflow `.github/workflows/pages.yml` выложит папку `webapp/`. Адрес будет вида `https://<user>.github.io/arabic-lessons-bot/`.
+2. **Mini App на GitHub Pages.** Запушьте репозиторий на GitHub, затем Settings → Pages → Source: **GitHub Actions**. Workflow `.github/workflows/pages.yml` выложит папку `webapp/`. Адрес будет вида `https://ahmad-koder.github.io/arabic_lessons/`.
 3. **Mini App в BotFather (необязательно, для ссылок `t.me/<bot>/<app>`).** `/newapp` → выберите бота → укажите адрес из шага 2.
 4. **Запуск бота** на сервере:
 
@@ -19,6 +19,22 @@
    ```
 
    Чтобы бот проверял подписку, добавьте его администратором в канал (права можно не давать).
+
+## Бот на сервере muhadis.com
+
+Бот работает рядом с сайтом как systemd-служба `arabic-bot` от отдельного пользователя `arabicbot`, код в `/srv/arabic-bot`. Открытых портов не нужно: бот сам опрашивает Telegram.
+
+Первая установка (одно SSH-подключение — на сервере лимит ufw):
+
+```bash
+ssh root@5.181.187.171
+curl -fsSL https://raw.githubusercontent.com/Ahmad-koder/arabic_lessons/main/deploy/server-setup.sh | sh
+nano /srv/arabic-bot/.env     # BOT_TOKEN, CHANNEL_ID
+sh /srv/arabic-bot/deploy/server-setup.sh
+```
+
+Обновление после `git push`: `ssh root@5.181.187.171 sh /srv/arabic-bot/deploy/update.sh`.
+Логи: `journalctl -u arabic-bot -f`.
 
 ## Ссылки на конкретный урок
 

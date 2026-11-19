@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("arabic-bot")
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
-# HTTPS-адрес Mini App, например https://<user>.github.io/arabic-lessons-bot/
+# HTTPS-адрес Mini App, например https://ahmad-koder.github.io/arabic_lessons/
 WEBAPP_URL = os.environ["WEBAPP_URL"].rstrip("/") + "/"
 # Необязательно: @username или числовой id канала. Если задан, бот пускает только подписчиков.
 CHANNEL_ID = os.environ.get("CHANNEL_ID", "").strip()

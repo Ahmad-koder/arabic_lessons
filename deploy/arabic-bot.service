@@ -1,0 +1,18 @@
+[Unit]
+Description=Arabic lessons Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=arabicbot
+WorkingDirectory=/srv/arabic-bot
+EnvironmentFile=/srv/arabic-bot/.env
+ExecStart=/srv/arabic-bot/.venv/bin/python bot/main.py
+Restart=always
+RestartSec=5
+MemoryMax=200M
+CPUQuota=25%
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
