@@ -21,7 +21,7 @@
   }
 
   // Своя палитра (styles.css): светлая или тёмная — вслед за темой Telegram или системы
-  const THEME_BG = { light: "#f5efe3", dark: "#0f1613" };
+  const THEME_BG = { light: "#f4f5f7", dark: "#101318" };
 
   function applyTheme() {
     let scheme = "light";
@@ -216,9 +216,8 @@
       return progress.done[l.id] === true;
     }).length;
 
-    // Шапка с орнаментом и общим прогрессом
+    // Шапка с общим прогрессом
     const hero = el("section", "hero");
-    hero.appendChild(el("div", "pattern"));
     const inner = el("div", "hero-inner");
     inner.appendChild(el("div", "hero-word", '<span dir="rtl" lang="ar">الْفِعْلُ</span>'));
     inner.appendChild(el("h1", null, escapeHtml(course.course)));
@@ -417,7 +416,6 @@
 
     // Шапка урока
     const head = el("header", "card lesson-head");
-    head.appendChild(el("div", "pattern"));
     head.appendChild(el("div", "eyebrow", "Урок " + lesson.id + " из " + course.lessons.length));
     head.appendChild(el("h1", null, escapeHtml(lesson.title)));
     if (lesson.summary) {
