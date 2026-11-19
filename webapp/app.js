@@ -20,6 +20,31 @@
     }
   }
 
+  // Своя палитра (styles.css): светлая или тёмная — вслед за темой Telegram или системы
+  const THEME_BG = { light: "#f5efe3", dark: "#0f1613" };
+
+  function applyTheme() {
+    let scheme = "light";
+    if (inTelegram() && tg.colorScheme) {
+      scheme = tg.colorScheme;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      scheme = "dark";
+    }
+    document.documentElement.setAttribute("data-theme", scheme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", THEME_BG[scheme]);
+    }
+    if (inTelegram() && tg.isVersionAtLeast && tg.isVersionAtLeast("6.1")) {
+      try {
+        tg.setHeaderColor(THEME_BG[scheme]);
+        tg.setBackgroundColor(THEME_BG[scheme]);
+      } catch (e) {
+        // старые клиенты Telegram — не критично
+      }
+    }
+  }
+
   function cloudAvailable() {
     return inTelegram() && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9");
   }
@@ -169,26 +194,82 @@
     return { total: total, correct: correct };
   }
 
+  function lessonsWord(n) {
+    const m10 = n % 10;
+    const m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) {
+      return "урок";
+    }
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) {
+      return "урока";
+    }
+    return "уроков";
+  }
+
   function renderList() {
     setBackButton(false);
+    setReadProgress(false);
     app.innerHTML = "";
-    app.appendChild(el("h1", null, escapeHtml(course.course)));
+
+    const total = course.lessons.length;
+    const doneCount = course.lessons.filter(function (l) {
+      return progress.done[l.id] === true;
+    }).length;
+
+    // Шапка с орнаментом и общим прогрессом
+    const hero = el("section", "hero");
+    hero.appendChild(el("div", "pattern"));
+    const inner = el("div", "hero-inner");
+    inner.appendChild(el("div", "hero-word", '<span dir="rtl" lang="ar">الْفِعْلُ</span>'));
+    inner.appendChild(el("h1", null, escapeHtml(course.course)));
+    inner.appendChild(el("p", "hero-sub",
+      total + " " + lessonsWord(total) + (doneCount ? " · пройдено " + doneCount : "")));
+    const bar = el("div", "hero-progress");
+    const fill = el("span");
+    fill.style.width = Math.round((doneCount / total) * 100) + "%";
+    bar.appendChild(fill);
+    inner.appendChild(bar);
+    hero.appendChild(inner);
+    app.appendChild(hero);
+
+    // «Продолжить» — первый непройденный урок
+    const next = course.lessons.find(function (l) {
+      return progress.done[l.id] !== true;
+    });
+    if (next) {
+      const cont = el("button", "continue");
+      cont.type = "button";
+      cont.appendChild(el("div", "continue-icon", doneCount ? "→" : "▶"));
+      const cb = el("div");
+      cb.appendChild(el("div", "continue-label", doneCount ? "Продолжить" : "Начать"));
+      cb.appendChild(el("div", "continue-title", "Урок " + next.id + ". " + escapeHtml(next.title)));
+      cont.appendChild(cb);
+      cont.addEventListener("click", function () {
+        go("#/lesson/" + next.id);
+      });
+      app.appendChild(cont);
+    }
+
+    app.appendChild(el("div", "section-label", "Все уроки"));
 
     course.lessons.forEach(function (lesson) {
       const done = progress.done[lesson.id] === true;
       const card = el("button", "card lesson-link" + (done ? " done" : ""));
       card.type = "button";
       card.appendChild(el("div", "lesson-num", done ? "✓" : String(lesson.id)));
-      const body = el("div");
-      body.appendChild(el("div", "lesson-title", "Урок " + lesson.id + ". " + escapeHtml(lesson.title)));
+      const body = el("div", "lesson-body");
+      body.appendChild(el("div", "lesson-title", escapeHtml(lesson.title)));
       body.appendChild(el("div", "lesson-sub", rich(lesson.summary)));
       const st = exerciseStats(lesson);
       if (st.total > 0) {
-        const bar = el("div", "progress");
-        const fill = el("span");
-        fill.style.width = Math.round((st.correct / st.total) * 100) + "%";
-        bar.appendChild(fill);
-        body.appendChild(bar);
+        const meta = el("div", "lesson-meta");
+        const pbar = el("div", "progress");
+        const pfill = el("span");
+        pfill.style.width = Math.round((st.correct / st.total) * 100) + "%";
+        pbar.appendChild(pfill);
+        meta.appendChild(pbar);
+        meta.appendChild(el("span", "count", "тесты " + st.correct + "/" + st.total));
+        body.appendChild(meta);
       }
       card.appendChild(body);
       card.addEventListener("click", function () {
@@ -197,6 +278,24 @@
       app.appendChild(card);
     });
   }
+
+  // Тонкая полоса прогресса чтения урока
+  const readBar = el("div", "read-progress");
+  document.body.appendChild(readBar);
+
+  function updateReadProgress() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    readBar.style.width = (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0) + "%";
+  }
+
+  function setReadProgress(on) {
+    readBar.hidden = !on;
+    if (on) {
+      updateReadProgress();
+    }
+  }
+
+  window.addEventListener("scroll", updateReadProgress, { passive: true });
 
   function renderBlock(block) {
     if (block.type === "p") {
@@ -292,7 +391,7 @@
 
   function renderReveal(ex) {
     const box = el("div");
-    const btn = el("button", "btn", "Показать ответ");
+    const btn = el("button", "btn reveal", "Показать ответ");
     btn.type = "button";
     const ans = el("div", "answer", rich(ex.answer));
     ans.hidden = true;
@@ -316,25 +415,45 @@
       app.appendChild(back);
     }
 
-    app.appendChild(el("h1", null, "Урок " + lesson.id + ". " + escapeHtml(lesson.title)));
+    // Шапка урока
+    const head = el("header", "card lesson-head");
+    head.appendChild(el("div", "pattern"));
+    head.appendChild(el("div", "eyebrow", "Урок " + lesson.id + " из " + course.lessons.length));
+    head.appendChild(el("h1", null, escapeHtml(lesson.title)));
+    if (lesson.summary) {
+      head.appendChild(el("p", "lesson-summary", rich(lesson.summary)));
+    }
+    app.appendChild(head);
 
-    const theory = el("div", "card");
+    // Теория: каждый заголовок открывает новую карточку-раздел
+    let section = null;
     lesson.blocks.forEach(function (block) {
-      theory.appendChild(renderBlock(block));
+      if (!section || block.type === "h") {
+        section = el("section", "card section");
+        app.appendChild(section);
+      }
+      section.appendChild(renderBlock(block));
     });
-    app.appendChild(theory);
 
-    app.appendChild(el("h2", null, "Упражнения"));
+    // Упражнения
+    const exHead = el("div", "ex-header");
+    exHead.appendChild(el("h2", null, "Упражнения"));
     const score = el("div", "score");
+    exHead.appendChild(score);
+    app.appendChild(exHead);
 
     function updateScore() {
       const st = exerciseStats(lesson);
-      score.textContent = "Тесты: " + st.correct + " из " + st.total + " верно";
+      score.textContent = "тесты " + st.correct + " из " + st.total;
+      score.hidden = st.total === 0;
     }
 
     lesson.exercises.forEach(function (ex, ei) {
       const card = el("div", "card");
-      card.appendChild(el("div", "ex-prompt", (ei + 1) + ". " + rich(ex.prompt)));
+      const prompt = el("div", "ex-prompt");
+      prompt.appendChild(el("span", "ex-n", String(ei + 1)));
+      prompt.appendChild(el("div", null, rich(ex.prompt)));
+      card.appendChild(prompt);
       if (ex.type === "choice") {
         card.appendChild(renderChoice(lesson, ex, ei, updateScore));
       } else {
@@ -343,17 +462,20 @@
       app.appendChild(card);
     });
     updateScore();
-    app.appendChild(score);
 
+    // Отметка о прохождении и навигация
     const doneBtn = el("button", "btn primary");
     doneBtn.type = "button";
+    const prev = lessonById(lesson.id - 1);
     const next = lessonById(lesson.id + 1);
 
     function paintDone() {
-      if (progress.done[lesson.id] === true) {
-        doneBtn.textContent = next ? "Следующий урок →" : "К списку уроков";
+      const done = progress.done[lesson.id] === true;
+      doneBtn.classList.toggle("is-done", done);
+      if (done) {
+        doneBtn.textContent = next ? "✓ Пройден · следующий урок →" : "✓ Пройден · к списку уроков";
       } else {
-        doneBtn.textContent = "Урок пройден";
+        doneBtn.textContent = "Отметить урок пройденным";
       }
     }
 
@@ -368,10 +490,28 @@
       go(next ? "#/lesson/" + next.id : "#/");
     });
     paintDone();
-    const wrap = el("div");
-    wrap.style.marginTop = "16px";
-    wrap.appendChild(doneBtn);
-    app.appendChild(wrap);
+    const finish = el("div", "finish");
+    finish.appendChild(doneBtn);
+
+    const nav = el("div", "lesson-nav");
+    [[prev, "← Урок "], [next, "Урок "]].forEach(function (pair, i) {
+      const target = pair[0];
+      const b = el("button", "btn");
+      b.type = "button";
+      if (target) {
+        b.textContent = i === 0 ? pair[1] + target.id : pair[1] + target.id + " →";
+        b.addEventListener("click", function () {
+          go("#/lesson/" + target.id);
+        });
+      } else {
+        b.disabled = true;
+      }
+      nav.appendChild(b);
+    });
+    finish.appendChild(nav);
+    app.appendChild(finish);
+
+    setReadProgress(true);
   }
 
   // ---------- Старт ----------
@@ -389,11 +529,21 @@
   }
 
   function init() {
+    applyTheme();
     if (tg) {
       tg.ready();
       tg.expand();
       if (tg.BackButton) {
         tg.BackButton.onClick(onBack);
+      }
+      if (tg.onEvent) {
+        tg.onEvent("themeChanged", applyTheme);
+      }
+    }
+    if (!inTelegram() && window.matchMedia) {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mq.addEventListener) {
+        mq.addEventListener("change", applyTheme);
       }
     }
     Promise.all([
